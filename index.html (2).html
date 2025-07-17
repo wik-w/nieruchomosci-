@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strona Nieruchomości XYZ</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f2f2f2;
+    }
+    header, footer {
+      background-color: #2c3e50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .filters, .offers {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+    }
+    .filters label, .filters input, .filters select {
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    .offer {
+      display: inline-block;
+      vertical-align: top;
+      width: 30%;
+      background: #eaeaea;
+      margin: 1.5%;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .offer img {
+      width: 100%;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .gallery {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .gallery img {
+      width: 48%;
+      height: auto;
+    }
+    .contact, .map {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal img {
+      max-width: 90%;
+      max-height: 90%;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Nieruchomości XYZ</h1>
+  </header>
+
+  <section class="filters">
+    <h2>Filtruj oferty</h2>
+    <label>Miasto:
+      <select id="cityFilter">
+        <option value="">Dowolne</option>
+        <option value="Warszawa">Warszawa</option>
+        <option value="Kraków">Kraków</option>
+        <option value="Gdańsk">Gdańsk</option>
+      </select>
+    </label>
+    <label>Maks. cena:
+      <input type="number" id="priceFilter" placeholder="np. 800000">
+    </label>
+    <label>Min. metraż:
+      <input type="number" id="sizeFilter" placeholder="np. 50">
+    </label>
+    <label>Min. pokoje:
+      <input type="number" id="roomFilter" placeholder="np. 2">
+    </label>
+    <label>Garaż:
+      <select id="garageFilter">
+        <option value="">Dowolnie</option>
+        <option value="Tak">Tak</option>
+        <option value="Nie">Nie</option>
+      </select>
+    </label>
+    <label>Styl:
+      <select id="styleFilter">
+        <option value="">Dowolny</option>
+        <option value="Nowoczesny">Nowoczesny</option>
+        <option value="Klasyczny">Klasyczny</option>
+      </select>
+    </label>
+    <label>Kolor:
+      <select id="colorFilter">
+        <option value="">Dowolny</option>
+        <option value="Biały">Biały</option>
+        <option value="Szary">Szary</option>
+        <option value="Beżowy">Beżowy</option>
+      </select>
+    </label>
+    <button onclick="filterOffers()">Filtruj</button>
+  </section>
+
+  <section class="offers" id="offersContainer">
+    <!-- Oferty są dodawane dynamicznie przez JS -->
+  </section>
+
+  <section class="contact">
+    <h2>Kontakt</h2>
+    <form>
+      <label>Imię:<br><input type="text" name="name"></label><br>
+      <label>Email:<br><input type="email" name="email"></label><br>
+      <label>Wiadomość:<br><textarea name="message"></textarea></label><br>
+      <button type="submit">Wyślij</button>
+    </form>
+  </section>
+
+  <section class="map">
+    <h2>Nasza lokalizacja</h2>
+    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2443.002029926684!2d21.01222941580033!3d52.22967527975725!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x471ecc669899b6f5%3A0xa3c42928b63dd154!2sWarszawa!5e0!3m2!1spl!2spl!4v1616438011494!5m2!1spl!2spl" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Nieruchomości XYZ</p>
+  </footer>
+
+  <div class="modal" id="imageModal" onclick="this.style.display='none'">
+    <img id="modalImage" src="" alt="Powiększone zdjęcie">
+  </div>
+
+  <script>
+    const offers = [
+      {
+        id: 1,
+        city: "Warszawa",
+        price: 780000,
+        size: 68,
+        rooms: 3,
+        garage: "Tak",
+        style: "Nowoczesny",
+        color: "Biały",
+        title: "Nowoczesne mieszkanie na Mokotowie",
+        description: "Przestronne, jasne mieszkanie z balkonem, blisko metra.",
+        images: ["https://source.unsplash.com/400x250/?apartment,white", "https://source.unsplash.com/400x250/?living-room"]
+      },
+      {
+        id: 2,
+        city: "Kraków",
+        price: 620000,
+        size: 55,
+        rooms: 2,
+        garage: "Nie",
+        style: "Klasyczny",
+        color: "Beżowy",
+        title: "Przytulne mieszkanie w centrum",
+        description: "Idealne dla pary, blisko rynku.",
+        images: ["https://source.unsplash.com/400x250/?building,beige", "https://source.unsplash.com/400x250/?kitchen"]
+      },
+      {
+        id: 3,
+        city: "Gdańsk",
+        price: 950000,
+        size: 82,
+        rooms: 4,
+        garage: "Tak",
+        style: "Nowoczesny",
+        color: "Szary",
+        title: "Luksusowy apartament nad morzem",
+        description: "Widok na zatokę, nowoczesne wnętrze.",
+        images: ["https://source.unsplash.com/400x250/?modern-home", "https://source.unsplash.com/400x250/?bathroom"]
+      },
+      {
+        id: 4,
+        city: "Warszawa",
+        price: 1100000,
+        size: 90,
+        rooms: 4,
+        garage: "Tak",
+        style: "Nowoczesny",
+        color: "Biały",
+        title: "Ekskluzywny dom na Żoliborzu",
+        description: "Dom z ogrodem, świetna lokalizacja.",
+        images: ["https://source.unsplash.com/400x250/?villa", "https://source.unsplash.com/400x250/?interior"]
+      },
+      {
+        id: 5,
+        city: "Kraków",
+        price: 540000,
+        size: 45,
+        rooms: 2,
+        garage: "Nie",
+        style: "Klasyczny",
+        color: "Beżowy",
+        title: "Małe mieszkanie na Podgórzu",
+        description: "Ciche osiedle, blisko tramwaju.",
+        images: ["https://source.unsplash.com/400x250/?house", "https://source.unsplash.com/400x250/?sofa"]
+      },
+      {
+        id: 6,
+        city: "Gdańsk",
+        price: 880000,
+        size: 76,
+        rooms: 3,
+        garage: "Tak",
+        style: "Nowoczesny",
+        color: "Szary",
+        title: "Nowoczesne mieszkanie blisko plaży",
+        description: "Świetne dla rodziny, 2 minuty od morza.",
+        images: ["https://source.unsplash.com/400x250/?flat", "https://source.unsplash.com/400x250/?bedroom"]
+      }
+    ];
+
+    function showModal(src) {
+      document.getElementById('modalImage').src = src;
+      document.getElementById('imageModal').style.display = 'flex';
+    }
+
+    function renderOffers() {
+      const container = document.getElementById('offersContainer');
+      container.innerHTML = '';
+      const city = document.getElementById('cityFilter').value;
+      const price = parseInt(document.getElementById('priceFilter').value);
+      const size = parseInt(document.getElementById('sizeFilter').value);
+      const rooms = parseInt(document.getElementById('roomFilter').value);
+      const garage = document.getElementById('garageFilter').value;
+      const style = document.getElementById('styleFilter').value;
+      const color = document.getElementById('colorFilter').value;
+
+      const filtered = offers.filter(o => {
+        return (!city || o.city === city) &&
+               (!price || o.price <= price) &&
+               (!size || o.size >= size) &&
+               (!rooms || o.rooms >= rooms) &&
+               (!garage || o.garage === garage) &&
+               (!style || o.style === style) &&
+               (!color || o.color === color);
+      });
+
+      filtered.forEach(o => {
+        const offerDiv = document.createElement('div');
+        offerDiv.className = 'offer';
+        offerDiv.innerHTML = `
+          <h3>${o.title}</h3>
+          <div class="gallery">
+            <img src="${o.images[0]}" onclick="showModal('${o.images[0]}')">
+            <img src="${o.images[1]}" onclick="showModal('${o.images[1]}')">
+          </div>
+          <p><strong>Miasto:</strong> ${o.city}</p>
+          <p><strong>Cena:</strong> ${o.price} zł</p>
+          <p><strong>Metraż:</strong> ${o.size} m²</p>
+          <p><strong>Pokoje:</strong> ${o.rooms}</p>
+          <p><strong>Garaż:</strong> ${o.garage}</p>
+          <p><strong>Styl:</strong> ${o.style}</p>
+          <p><strong>Kolor:</strong> ${o.color}</p>
+          <p>${o.description}</p>
+          <a href="#">Szczegóły oferty</a>
+        `;
+        container.appendChild(offerDiv);
+      });
+    }
+
+    function filterOffers() {
+      renderOffers();
+    }
+
+    window.onload = () => {
+      renderOffers();
+    }
+  </script>
+</body>
+</html>
